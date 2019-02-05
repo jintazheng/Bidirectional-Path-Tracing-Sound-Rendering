@@ -11,7 +11,7 @@ public:
 class Solid : public Material {
 public:
 
-	Solid(Vec3 const& dif, Vec3 const& spec, Vec3 const& emit, float const shin) : mDiffuse(dif), mSpecular(spec), mEmittance(emit), mShinyness(shin) {}
+	Solid(Vec3 const& dif, Vec3 const& spec, float const shin) : mDiffuse(dif), mSpecular(spec), mShinyness(shin) {}
 
 	virtual bool scatter(Ray const& r_in, HitRecord const& rec, float& scatterAmount, Ray& scattered) const {
 		Vec3 target = rec.p + rec.normal + RandInSphere();
@@ -20,11 +20,10 @@ public:
 		return true;
 	}
 
-	Vec3 mEmittance;
 	Vec3 mDiffuse;
 	Vec3 mSpecular;
 	float mShinyness;
-	float mScatterAmount;
+	float mScatterAmount = 0.4f;
 };
 
 class FlatColor : public Material {
@@ -85,7 +84,7 @@ public:
 	float fuzz;
 };*/
 
-/*class Metal : public Material {
+class Metal : public Material {
 public:
 	Metal(Vec3 const& a, float const f) : albedo(a), fuzz(f) {}
 
@@ -98,10 +97,10 @@ public:
 
 	Vec3 albedo;
 	float fuzz;
-};*/
+};
 
 
-/*class Dielectric : public Material {
+class Dielectric : public Material {
 public:
 	Dielectric(float const ri) : ref_idx(ri) {}
 
@@ -147,4 +146,4 @@ public:
 	}
 
 	float ref_idx;
-};*/
+};

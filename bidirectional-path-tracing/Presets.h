@@ -194,45 +194,39 @@ void LoadPreset(World** world, Camera** camera, int const width, int const heigh
 
 		float const wallShiny = 15.f;
 		Vec3 const wallSpec = Vec3(0.1, 0.1, 0.1);
-		Vec3 red   = Vec3(183.f / 255.f, 33.f / 255.f, 33.f / 255.f);
-		Vec3 green = Vec3(40.f / 255.f, 145.f / 255.f, 24.f / 255.f);
-		Vec3 black = Vec3(0, 0, 0);
-		Vec3 white = Vec3(1, 1, 1);
 
 		// Floor
-		objects.push_back(new Triangle(Vec3(-1, 0, 5), Vec3(1, 0, 5), Vec3(1, 0, -1), new Solid(white, wallSpec, black, wallShiny)));
-		objects.push_back(new Triangle(Vec3(1, 0, -1), Vec3(-1, 0, -1), Vec3(-1, 0, 5), new Solid(white, wallSpec, black, wallShiny)));
+		objects.push_back(new Triangle(Vec3(-1, 0, 5), Vec3(1, 0, 5), Vec3(1, 0, -1), new Solid(Vec3(0.6f, 0.6f, 0.6f), wallSpec, wallShiny)));
+		objects.push_back(new Triangle(Vec3(1, 0, -1), Vec3(-1, 0, -1), Vec3(-1, 0, 5), new Solid(Vec3(0.6f, 0.6f, 0.6f), wallSpec, wallShiny)));
 
 		// Left wall
-		objects.push_back(new Triangle(Vec3(-1, 0, 5), Vec3(-1, 0, -1), Vec3(-1, 2, 5), new Solid(red, wallSpec, black, wallShiny)));
-		objects.push_back(new Triangle(Vec3(-1, 0, -1), Vec3(-1, 2, -1), Vec3(-1, 2, 5), new Solid(red, wallSpec, black, wallShiny)));
+		objects.push_back(new Triangle(Vec3(-1, 0, 5), Vec3(-1, 0, -1), Vec3(-1, 2, 5), new Solid(Vec3(183.f / 255.f, 33.f / 255.f, 33.f / 255.f), wallSpec, wallShiny)));
+		objects.push_back(new Triangle(Vec3(-1, 0, -1), Vec3(-1, 2, -1), Vec3(-1, 2, 5), new Solid(Vec3(183.f / 255.f, 33.f / 255.f, 33.f / 255.f), wallSpec, wallShiny)));
 
 		// Right wall
-		objects.push_back(new Triangle(Vec3(1, 0, 5), Vec3(1, 2, 5), Vec3(1, 0, -1), new Solid(green, wallSpec, black, wallShiny)));
-		objects.push_back(new Triangle(Vec3(1, 2, 5), Vec3(1, 2, -1), Vec3(1, 0, -1), new Solid(green, wallSpec, black, wallShiny)));
+		objects.push_back(new Triangle(Vec3(1, 0, 5), Vec3(1, 2, 5), Vec3(1, 0, -1), new Solid(Vec3(40.f / 255.f, 145.f / 255.f, 24.f / 255.f), wallSpec, wallShiny)));
+		objects.push_back(new Triangle(Vec3(1, 2, 5), Vec3(1, 2, -1), Vec3(1, 0, -1), new Solid(Vec3(40.f / 255.f, 145.f / 255.f, 24.f / 255.f), wallSpec, wallShiny)));
 
 		// back wall
-		objects.push_back(new Triangle(Vec3(-1, 0, -1), Vec3(1, 0, -1), Vec3(1, 2, -1), new Solid(white, wallSpec, black, wallShiny)));
-		objects.push_back(new Triangle(Vec3(1, 2, -1), Vec3(-1, 2, -1), Vec3(-1, 0, -1), new Solid(white, wallSpec, black, wallShiny)));
+		objects.push_back(new Triangle(Vec3(-1, 0, -1), Vec3(1, 0, -1), Vec3(1, 2, -1), new Solid(Vec3(0.6f, 0.6f, 0.6f), wallSpec, wallShiny)));
+		objects.push_back(new Triangle(Vec3(1, 2, -1), Vec3(-1, 2, -1), Vec3(-1, 0, -1), new Solid(Vec3(0.6f, 0.6f, 0.6f), wallSpec, wallShiny)));
 
 		// front wall
-		objects.push_back(new Triangle(Vec3(1, 0, 5), Vec3(-1, 0, 5), Vec3(1, 2, 5), new Solid(white, wallSpec, black, wallShiny)));
-		objects.push_back(new Triangle(Vec3(-1, 2, 5), Vec3(1, 2, 5), Vec3(-1, 0, 5), new Solid(white, wallSpec, black, wallShiny)));
+		objects.push_back(new Triangle(Vec3(1, 0, 5), Vec3(-1, 0, 5), Vec3(1, 2, 5), new Solid(Vec3(0.6f, 0.6f, 0.6f), wallSpec, wallShiny)));
+		objects.push_back(new Triangle(Vec3(-1, 2, 5), Vec3(1, 2, 5), Vec3(-1, 0, 5), new Solid(Vec3(0.6f, 0.6f, 0.6f), wallSpec, wallShiny)));
 
 		// Ceiling
-		objects.push_back(new Triangle(Vec3(-1, 2, 5), Vec3(1, 2, -1), Vec3(1, 2, 5), new Solid(white, wallSpec, black, wallShiny)));
-		objects.push_back(new Triangle(Vec3(1, 2, -1), Vec3(-1, 2, 5), Vec3(-1, 2, -1),  new Solid(white, wallSpec, black, wallShiny)));
+		objects.push_back(new Triangle(Vec3(-1, 2, 5), Vec3(1, 2, -1), Vec3(1, 2, 5), new Solid(Vec3(0.6f, 0.6f, 0.6f), wallSpec, wallShiny))); // TODO: Why are these black?
+		objects.push_back(new Triangle(Vec3(1, 2, -1), Vec3(-1, 2, 5), Vec3(-1, 2, -1), new Solid(Vec3(0.6f, 0.6f, 0.6f), wallSpec, wallShiny)));
 
 		ModelLoader l;
 		Model* cube1 = l.LoadModel("Models/Cube45.obj");
-		cube1->AddMeshes(objects, Vec3(0.4, -0.2f, 0), new Solid(Vec3(0.6f, 0.6f, 0.6f), Vec3(0.6f, 0.6f, 0.6f), black, 5.f));
+		cube1->AddMeshes(objects, Vec3(0.4, -0.2f, 0), new Solid(Vec3(0.6f, 0.6f, 0.6f), Vec3(0.6f, 0.6f, 0.6f), 5.f));
 
-		//std::vector<Light*> lights;
-		//lights.push_back(new SphereLight(Vec3(0, 1.8f, 0), Vec3(0.2, 0.2f, 0.2), 1.f));
+		std::vector<Light*> lights;
+		lights.push_back(new SphereLight(Vec3(0, 1.8f, 0), Vec3(0.2, 0.2f, 0.2), 1.f));
 
-		objects.push_back(new Sphere(Vec3(0, 1.8f, 0), 0.5f, new Solid(black, black, white, 0)));
-
-		*world = new World(objects);
+		*world = new World(objects, lights);
 
 		// Set camera location
 		Vec3 cameraLocation(0, 1, 4);
