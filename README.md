@@ -1,1 +1,1 @@
-# Bidirectional-Path-Tracing-Image-Rendering
+# Bidirectional-Path-Tracing-Sound-Rendering
