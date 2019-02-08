@@ -9,12 +9,12 @@ void LoadPreset(World** world, Preset const p) {
 	case kBox: {
 		std::vector<Object*> objects;
 
-		Material* m = new Solid(Vec3(0.95f, 0.95f, 0.95f));
+		Material* m = new Solid(Vec3(0.97f, 0.97f, 0.97f));
 
 		// Size in each direction
 		float x = 10.f; // meters
-		float y = 10.f;
-		float z = 10.f;
+		float y = 5.f;
+		float z = 5.f;
 
 		// Front vertices
 		Vec3 const fTopLeft  = Vec3(-x, y, z);
@@ -54,10 +54,10 @@ void LoadPreset(World** world, Preset const p) {
 
 
 		std::vector<SoundNode*> sounds;
-		sounds.push_back(new SoundNode(Vec3(-5, -5, -5)));
+		sounds.push_back(new SoundNode(Vec3(-4, 0, 0)));
 
 		//listener
-		objects.push_back(new Sphere(Vec3(5, 5, 5), 0.25f, new Listener()));
+		objects.push_back(new Sphere(Vec3(4, 0, 0), 0.25f, new Listener()));
 
 		*world = new World(objects, sounds);
 
