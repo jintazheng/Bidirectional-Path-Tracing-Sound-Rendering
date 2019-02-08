@@ -19,11 +19,14 @@ float RandFloat() {
 
 Vec3 RandInSphere() {
 	static Vec3 p;
-	do {
-		p[0] = RandFloat();
-		p[1] = RandFloat();
-		p[2] = RandFloat();
-	} while (p.lengthSquared() > 1);
+	p[0] = distribution(generator);
+	p[1] = distribution(generator);
+	p[2] = distribution(generator);
+	p.normalize();
+	
+	float r = RandFloat();
+	
+	p *= pow(r, 0.333333f);
 	return p;
 }
 
