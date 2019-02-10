@@ -9,12 +9,13 @@ void LoadPreset(World** world, Preset const p) {
 	case kBox: {
 		std::vector<Object*> objects;
 
-		Material* m = new Solid(Vec3(0.97f, 0.97f, 0.97f));
+		Material* m = new Solid(Vec3(0.99f, 0.99f, 0.99f));
+		Material* floor = new Solid(Vec3(0.8f, 0.8f, 0.8f));
 
 		// Size in each direction
 		float x = 10.f; // meters
 		float y = 5.f;
-		float z = 5.f;
+		float z = 10.f;
 
 		// Front vertices
 		Vec3 const fTopLeft  = Vec3(-x, y, z);
@@ -29,8 +30,8 @@ void LoadPreset(World** world, Preset const p) {
 		Vec3 const bBottomRight = Vec3(x, -y, -z);
 
 		// Floor
-		objects.push_back(new Triangle(fBottomLeft, fBottomRight, bBottomLeft, m));
-		objects.push_back(new Triangle(bBottomRight, bBottomLeft, fBottomRight, m));
+		objects.push_back(new Triangle(fBottomLeft, fBottomRight, bBottomLeft, floor));
+		objects.push_back(new Triangle(bBottomRight, bBottomLeft, fBottomRight, floor));
 
 		// Left wall
 		objects.push_back(new Triangle(fTopLeft, fBottomLeft, bTopLeft, m));
@@ -54,10 +55,10 @@ void LoadPreset(World** world, Preset const p) {
 
 
 		std::vector<SoundNode*> sounds;
-		sounds.push_back(new SoundNode(Vec3(-4, 0, 0)));
+		sounds.push_back(new SoundNode(Vec3(-8, 0, -8)));
 
 		//listener
-		objects.push_back(new Sphere(Vec3(4, 0, 0), 0.25f, new Listener()));
+		objects.push_back(new Sphere(Vec3(8, 0, 8), 0.4f, new Listener()));
 
 		*world = new World(objects, sounds);
 
