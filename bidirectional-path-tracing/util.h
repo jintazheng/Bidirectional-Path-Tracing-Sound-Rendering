@@ -9,7 +9,7 @@ namespace {
 
 
 template<typename T> 
-bool isType(void* inp) {
+bool isType(Material* inp) {
 	return dynamic_cast<T>(inp);
 }
 
@@ -23,6 +23,32 @@ Vec3 RandInSphere() {
 	p[1] = distribution(generator);
 	p[2] = distribution(generator);
 	p.normalize();
+	
+	float r = RandFloat();
+	
+	p *= pow(r, 0.333333f);
+	return p;
+}
+
+Vec3 RandOnSphere() {
+	static Vec3 p;
+	p[0] = distribution(generator);
+	p[1] = distribution(generator);
+	p[2] = distribution(generator);
+	p.normalize();
+	return p;
+}
+
+Vec3 RandOnHemisphere(Vec3 n) {
+	static Vec3 p;
+	p[0] = distribution(generator);
+	p[1] = distribution(generator);
+	p[2] = distribution(generator);
+	p.normalize();
+
+	if (dot(n, p) < 0.f) {
+		p = -1 * p;
+	}
 	return p;
 }
 
@@ -32,6 +58,10 @@ Vec3 RandInDisk() {
 		p = 2.0 * Vec3(RandFloat(), RandFloat(), 0) - Vec3(1, 1, 0);
 	} while (dot(p, p) >= 1.0f);
 	return p;
+}
+
+float GetTimeFromDistance(float const distInMeters) {
+	return distInMeters / 343.f;  // Meters per second
 }
 
 Vec3 Reflect(Vec3 const& incident, Vec3 const& normal) {

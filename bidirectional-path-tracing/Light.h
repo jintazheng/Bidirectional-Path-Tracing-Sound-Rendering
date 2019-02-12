@@ -2,7 +2,7 @@
 
 #include "util.h"
 
-class Light : public Object {
+/*class Light : public Object {
 public:
 	virtual Vec3 RandInLight() = 0;
 	float mIntensity;
@@ -43,7 +43,7 @@ public:
 	}
 
 	//Cube mCube;
-};
+};*/
 
 // Box light
 // Sphere light clas

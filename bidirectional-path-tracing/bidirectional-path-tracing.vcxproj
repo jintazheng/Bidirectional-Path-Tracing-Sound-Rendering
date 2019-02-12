@@ -90,16 +90,17 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/bidirectional-path-tracing\3rd_party\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/bidirectional-path-tracing\3rd_party\assimp\include;$(SolutionDir)/bidirectional-path-tracing\3rd_party\SFML-2.5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)/bidirectional-path-tracing\3rd_party\assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(SolutionDir)/bidirectional-path-tracing\3rd_party\assimp\lib\assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)/bidirectional-path-tracing\3rd_party\assimp\lib;$(SolutionDir)/bidirectional-path-tracing\3rd_party\SFML-2.5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(SolutionDir)/bidirectional-path-tracing\3rd_party\assimp\lib\assimp-vc140-mt.lib;$(SolutionDir)/bidirectional-path-tracing\3rd_party\SFML-2.5.1\lib\sfml-audio-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d  "$(SolutionDir)bidirectional-path-tracing\3rd_party\assimp\lib\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y /d  "$(SolutionDir)bidirectional-path-tracing\3rd_party\assimp\lib\*.dll" "$(OutDir)"
+xcopy /y /d  "$(SolutionDir)bidirectional-path-tracing\3rd_party\SFML-2.5.1\bin\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -110,16 +111,17 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/bidirectional-path-tracing\3rd_party\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/bidirectional-path-tracing\3rd_party\assimp\include;$(SolutionDir)/bidirectional-path-tracing\3rd_party\SFML-2.5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)/bidirectional-path-tracing\3rd_party\assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(SolutionDir)/bidirectional-path-tracing\3rd_party\assimp\lib\assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)/bidirectional-path-tracing\3rd_party\assimp\lib;$(SolutionDir)/bidirectional-path-tracing\3rd_party\SFML-2.5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(SolutionDir)/bidirectional-path-tracing\3rd_party\assimp\lib\assimp-vc140-mt.lib;$(SolutionDir)/bidirectional-path-tracing\3rd_party\SFML-2.5.1\lib\sfml-audio-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d  "$(SolutionDir)bidirectional-path-tracing\3rd_party\assimp\lib\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y /d  "$(SolutionDir)bidirectional-path-tracing\3rd_party\assimp\lib\*.dll" "$(OutDir)"
+xcopy /y /d  "$(SolutionDir)bidirectional-path-tracing\3rd_party\SFML-2.5.1\bin\*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -185,6 +187,7 @@
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="Octree.h" />
     <ClInclude Include="Presets.h" />
+    <ClInclude Include="SoundNode.h" />
     <ClInclude Include="triangle.h" />
     <ClInclude Include="ray.h" />
     <ClInclude Include="sphere.h" />

@@ -5,28 +5,28 @@
 
 class Material {
 public:
-	virtual bool scatter(Ray const& r_in, HitRecord const& rec, float& scatterAmount, Ray& scattered) const = 0;
+	virtual bool scatter() const = 0;
 };
 
 class Solid : public Material {
 public:
-
-	Solid(Vec3 const& dif, Vec3 const& spec, float const shin) : mDiffuse(dif), mSpecular(spec), mShinyness(shin) {}
-
-	virtual bool scatter(Ray const& r_in, HitRecord const& rec, float& scatterAmount, Ray& scattered) const {
-		Vec3 target = rec.p + rec.normal + RandInSphere();
-		scattered = Ray(rec.p, target - rec.p);
-		scatterAmount = mScatterAmount;
-		return true;
+	virtual bool scatter() const {
+		return false;
 	}
+	Solid(Vec3 const attenuation) : mAttenuation(attenuation) {}
 
-	Vec3 mDiffuse;
-	Vec3 mSpecular;
-	float mShinyness;
-	float mScatterAmount = 0.4f;
+	Vec3 mAttenuation;
 };
 
-class FlatColor : public Material {
+class Listener : public Material {
+public:
+	virtual bool scatter() const {
+		return false;
+	}
+	// Indicates the listener has been hit
+};
+
+/*class FlatColor : public Material {
 public:
 		
 	FlatColor(Vec3 const& col) : mColor(col) {}
@@ -35,7 +35,7 @@ public:
 	}
 
 	Vec3 mColor;
-};
+};*/
 
 /*class Lambertian : public Material {
 public:
@@ -84,7 +84,7 @@ public:
 	float fuzz;
 };*/
 
-class Metal : public Material {
+/*class Metal : public Material {
 public:
 	Metal(Vec3 const& a, float const f) : albedo(a), fuzz(f) {}
 
@@ -146,4 +146,4 @@ public:
 	}
 
 	float ref_idx;
-};
+};*/
