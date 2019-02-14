@@ -5,7 +5,18 @@
 
 class Material {
 public:
+	Material(Vec3 const color) : drawColor(color) {}
 	virtual bool scatter() const = 0;
+
+	void SetDrawColor() {
+		glMaterialfv(GL_FRONT, GL_EMISSION, Array3(0, 0, 0));
+		glMaterialfv(GL_FRONT, GL_AMBIENT, Array3(drawColor.x(), drawColor.y(), drawColor.z()));
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, Array3(drawColor.x(), drawColor.y(), drawColor.z()));
+		glMaterialfv(GL_FRONT, GL_SPECULAR, Array3(0.f, 0.f, 0.f));
+		glMaterialf(GL_FRONT, GL_SHININESS, 10);
+	}
+
+	Vec3 drawColor;
 };
 
 class Solid : public Material {
@@ -13,13 +24,15 @@ public:
 	virtual bool scatter() const {
 		return false;
 	}
-	Solid(Vec3 const attenuation) : mAttenuation(attenuation) {}
+	Solid(Vec3 const attenuation, Vec3 const color) : mAttenuation(attenuation), Material(color) {}
 
 	Vec3 mAttenuation;
 };
 
 class Listener : public Material {
 public:
+	Listener(Vec3 const color) : Material(color) {}
+
 	virtual bool scatter() const {
 		return false;
 	}

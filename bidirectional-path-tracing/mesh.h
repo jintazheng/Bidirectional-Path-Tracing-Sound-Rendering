@@ -65,6 +65,13 @@ public:
 		return false;
 	}
 
+	virtual void Draw() {
+		glBegin(GL_TRIANGLES);
+		for (auto it = mTriangles.begin(); it != mTriangles.end(); ++it) {
+			(*it)->Draw();
+		}
+	}
+
 	// Structures only used for creating the polygons later
 	std::vector<Vertex> mVerticies;
 	std::vector<uint32_t> mIndicies;

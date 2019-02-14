@@ -105,6 +105,12 @@ public:
 		return hit_anything;
 	}
 
+	virtual void Draw() {
+		for (int ii = 0; ii < mElementsCount; ++ii) {
+			mElements[ii]->Draw();
+		}
+	}
+
 	int depth;
 	bool isLeaf;
 	Octree* child[8];
