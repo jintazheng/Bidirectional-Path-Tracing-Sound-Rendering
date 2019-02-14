@@ -3,7 +3,6 @@
 #include <vector>
 
 namespace {
-	int const samplesPerChunk = 512;
 	int const maxSamples = 441000;  // Store 10 seconds of audio
 }
 
@@ -11,9 +10,23 @@ class AudioStream : public sf::SoundStream
 {
 public:
 
-	void init(int const numChannels, int const sampleRate) {
-		initialize(numChannels, sampleRate);
+	void init(int const numChannels, int const sampleRate, int const perChunk) {
+		// Initialize storage
+		samplesPerChunk = perChunk;
 		mSamples = new sf::Int16[maxSamples];
+
+		// Initialize base class
+		initialize(numChannels, sampleRate);
+	}
+
+	void addSamples(float* buffer, size_t const bufferSize) {
+		if (mSampleCount + bufferSize > maxSamples) {
+			unloadAudio(maxSamples / 2); // Unload half the samples
+		}
+		for (int ii = 0; ii < bufferSize; ++ii) {
+			mSamples[ii + mSampleCount] = (sf::Int16)buffer[ii];
+		}
+		mSampleCount += bufferSize;
 	}
 
 	void addSamples(sf::Int16* buffer, size_t const bufferSize) {
@@ -70,6 +83,8 @@ private:
 
 
 	sf::Int16* mSamples;
-	size_t mSampleCount = 0;
-	size_t mCurrentSample = 0;
+	size_t mSampleCount = 0;  // The number of samples in mSamples
+	size_t mCurrentSample = 0; // The next sample to be queued up in mSamples
+
+	int samplesPerChunk = 0;
 };
