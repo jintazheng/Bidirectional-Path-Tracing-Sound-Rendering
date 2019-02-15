@@ -186,6 +186,7 @@ xcopy /y /d  "$(SolutionDir)bidirectional-path-tracing\3rd_party\SFML-2.5.1\bin\
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="Octree.h" />
+    <ClInclude Include="Path.h" />
     <ClInclude Include="Presets.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="SoundNode.h" />

@@ -9,11 +9,17 @@ public:
 	virtual bool scatter() const = 0;
 
 	void SetDrawColor() {
+		glColor3f(drawColor.x(), drawColor.y(), drawColor.z());
 		glMaterialfv(GL_FRONT, GL_EMISSION, Array3(0, 0, 0));
 		glMaterialfv(GL_FRONT, GL_AMBIENT, Array3(drawColor.x(), drawColor.y(), drawColor.z()));
 		glMaterialfv(GL_FRONT, GL_DIFFUSE, Array3(drawColor.x(), drawColor.y(), drawColor.z()));
 		glMaterialfv(GL_FRONT, GL_SPECULAR, Array3(0.f, 0.f, 0.f));
 		glMaterialf(GL_FRONT, GL_SHININESS, 10);
+		glMaterialfv(GL_BACK, GL_EMISSION, Array3(0, 0, 0));
+		glMaterialfv(GL_BACK, GL_AMBIENT, Array3(drawColor.x(), drawColor.y(), drawColor.z()));
+		glMaterialfv(GL_BACK, GL_DIFFUSE, Array3(drawColor.x(), drawColor.y(), drawColor.z()));
+		glMaterialfv(GL_BACK, GL_SPECULAR, Array3(0.f, 0.f, 0.f));
+		glMaterialf(GL_BACK, GL_SHININESS, 10);
 	}
 
 	Vec3 drawColor;

@@ -43,8 +43,9 @@ public:
 
 	virtual void Draw() {
 		material->SetDrawColor();
-		//glColor3f(material->drawColor.x(), material->drawColor.y(), material->drawColor.z());
-		MjbSphere(radius, center.x(), center.y(), center.z(), 20, 20);
+		glTranslatef(center.x(), center.y(), center.z());
+		MjbSphere(radius, 20, 20);
+		glTranslatef(-center.x(), -center.y(), -center.z());
 	}
 
 	Vec3 center;

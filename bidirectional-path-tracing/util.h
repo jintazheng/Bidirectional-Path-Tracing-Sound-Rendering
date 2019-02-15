@@ -5,6 +5,15 @@
 namespace {
 	std::default_random_engine generator(time(NULL));
 	std::normal_distribution<double> distribution(0.f, 1.f);
+	std::mutex worldMutex;
+}
+
+void LockWorld() {
+	worldMutex.lock();
+}
+
+void UnlockWorld() {
+	worldMutex.unlock();
 }
 
 float* Array3(float x, float y, float z) {

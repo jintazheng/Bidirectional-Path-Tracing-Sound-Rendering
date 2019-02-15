@@ -11,7 +11,7 @@ void LoadPreset(World** world, Preset const p) {
 
 		Material* m = new Solid(Vec3(0.99f, 0.99f, 0.99f), Vec3(0.21, .69, .27));
 		Material* floor = new Solid(Vec3(0.8f, 0.8f, 0.8f), Vec3(.86, .87, .75));
-		Material* ceiling = new Solid(Vec3(0.99f, 0.99f, 0.99f), Vec3(.86, .87, .75));
+		Material* ceiling = new Solid(Vec3(0.99f, 0.99f, 0.99f), Vec3(.75, .79, .85));
 
 		// Size in each direction
 		float x = 10.f; // meters
@@ -54,14 +54,14 @@ void LoadPreset(World** world, Preset const p) {
 		objects.push_back(new Triangle(fTopLeft, bTopLeft, fTopRight, ceiling));
 		objects.push_back(new Triangle(bTopRight, fTopRight, bTopLeft, ceiling));
 
-
-		std::vector<SoundNode*> sounds;
-		sounds.push_back(new SoundNode(Vec3(-8, 0, -8), 0.4f, new Solid(Vec3(1., 1., 1.), Vec3(1, 0., 0.))));
-
 		//listener
 		objects.push_back(new Sphere(Vec3(8, 0, 8), 0.4f, new Listener(Vec3(1., 1., 1.))));
 
-		*world = new World(objects, sounds);
+		// Sound sources
+		std::vector<Object*> nonColliding;
+		nonColliding.push_back(new SoundNode(Vec3(-8, 0, -8), 0.4f, new Solid(Vec3(1., 1., 1.), Vec3(1, 0., 0.))));
+
+		*world = new World(objects, nonColliding);
 
 		return;
 	}

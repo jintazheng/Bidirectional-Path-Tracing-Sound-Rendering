@@ -24,15 +24,15 @@ struct point *
 
 
 void
-DrawPoint(struct point *p, int x, int y, int z)
+DrawPoint(struct point *p)
 {
 	glNormal3f(p->nx, p->ny, p->nz);
 	glTexCoord2f(p->s, p->t);
-	glVertex3f(p->x + x, p->y + y, p->z + z);
+	glVertex3f(p->x, p->y, p->z);
 }
 
 void
-MjbSphere(float radius, float x, float y, float z, int slices, int stacks)
+MjbSphere(float radius, int slices, int stacks)
 {
 	struct point top, bot;		// top, bottom points
 	struct point *p;
@@ -93,16 +93,16 @@ MjbSphere(float radius, float x, float y, float z, int slices, int stacks)
 	for (int ilng = 0; ilng < NumLngs - 1; ilng++)
 	{
 		p = PtsPointer(NumLats - 1, ilng);
-		DrawPoint(p, x, y, z);
+		DrawPoint(p);
 
 		p = PtsPointer(NumLats - 2, ilng);
-		DrawPoint(p, x, y, z);
+		DrawPoint(p);
 
 		p = PtsPointer(NumLats - 2, ilng + 1);
-		DrawPoint(p, x, y, z);
+		DrawPoint(p);
 
 		p = PtsPointer(NumLats - 1, ilng + 1);
-		DrawPoint(p, x, y, z);
+		DrawPoint(p);
 	}
 	glEnd();
 
@@ -112,16 +112,16 @@ MjbSphere(float radius, float x, float y, float z, int slices, int stacks)
 	for (int ilng = 0; ilng < NumLngs - 1; ilng++)
 	{
 		p = PtsPointer(0, ilng);
-		DrawPoint(p, x, y, z);
+		DrawPoint(p);
 
 		p = PtsPointer(0, ilng + 1);
-		DrawPoint(p, x, y, z);
+		DrawPoint(p);
 
 		p = PtsPointer(1, ilng + 1);
-		DrawPoint(p, x, y, z);
+		DrawPoint(p);
 
 		p = PtsPointer(1, ilng);
-		DrawPoint(p, x, y, z);
+		DrawPoint(p);
 	}
 	glEnd();
 
@@ -129,21 +129,21 @@ MjbSphere(float radius, float x, float y, float z, int slices, int stacks)
 	// connect the other 4-sided polygons:
 
 	glBegin(GL_QUADS);
-	for (int ilat = 2; ilat < NumLats - 1; ilat++)
+	for (int ilat = 2; ilat < NumLats - 1; ilat++)  // Drawing inside out for some reason
 	{
 		for (int ilng = 0; ilng < NumLngs - 1; ilng++)
 		{
 			p = PtsPointer(ilat - 1, ilng);
-			DrawPoint(p, x, y, z);
+			DrawPoint(p);
 
 			p = PtsPointer(ilat - 1, ilng + 1);
-			DrawPoint(p, x, y, z);
+			DrawPoint(p);
 
 			p = PtsPointer(ilat, ilng + 1);
-			DrawPoint(p, x, y, z);
+			DrawPoint(p);
 
 			p = PtsPointer(ilat, ilng);
-			DrawPoint(p, x, y, z);
+			DrawPoint(p);
 		}
 	}
 	glEnd();
