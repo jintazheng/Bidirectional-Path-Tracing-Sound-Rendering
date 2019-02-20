@@ -177,6 +177,7 @@ xcopy /y /d  "$(SolutionDir)bidirectional-path-tracing\3rd_party\FFTW\bin\*.dll"
   <ItemGroup>
     <ClInclude Include="3rd_party\stb\stb_image.h" />
     <ClInclude Include="3rd_party\stb\stb_image_write.h" />
+    <ClInclude Include="AudioStream.h" />
     <ClInclude Include="Box.h" />
     <ClInclude Include="BVH.h" />
     <ClInclude Include="camera.h" />
