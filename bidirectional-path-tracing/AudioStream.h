@@ -2,6 +2,11 @@
 #include <fftw3.h>
 #include <SFML/Audio.hpp>
 
+namespace {
+	int const chunkSize = 1024;
+}
+
+
 void FillComplexArray(float* in, fftwf_complex* out, int const inCount, int const size) {
 	for (int ii = 0; ii < size; ++ii) {
 		if (ii < inCount) {
@@ -48,29 +53,6 @@ void MultArray(fftwf_complex* first, fftwf_complex* second, fftwf_complex* resul
 	}
 }
 
-void FFT(fftwf_complex* in, fftwf_complex* out, int N) {
-	fftwf_plan plan = fftwf_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
-
-	fftwf_execute(plan);
-
-	fftwf_destroy_plan(plan);
-	fftwf_cleanup();
-}
-
-void IFFT(fftwf_complex* in, fftwf_complex* out, int N) {
-	fftwf_plan plan = fftwf_plan_dft_1d(N, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
-
-	fftwf_execute(plan);
-
-	fftwf_destroy_plan(plan);
-	fftwf_cleanup();
-
-	// Scale the output for exact inverse
-	for (int ii = 0; ii < N; ++ii) {
-		out[ii][0] /= N;
-		out[ii][1] /= N;
-	}
-}
 
 float* Convolution(float *arr1, float *arr2, int len1, int len2, int *lenResult)
 {
@@ -145,11 +127,20 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 			fftwf_complex* multiplied = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * N);
 			fftwf_complex* result = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * N);
 
-			// Compute the mixed sound
-			FFT(sourceIn, sourceOut, N);
-			FFT(impulseIn, impulseOut, N);
+			// Create forward FFT plans
+			fftwf_plan sourcePlan = fftwf_plan_dft_1d(N, sourceIn, sourceOut, FFTW_FORWARD, FFTW_ESTIMATE);
+			fftwf_plan impulsePlan = fftwf_plan_dft_1d(N, impulseIn, impulseOut, FFTW_FORWARD, FFTW_ESTIMATE);
+
+			// Compute the forward FFT
+			fftwf_execute(sourcePlan);
+			fftwf_execute(impulsePlan);
+
+			// Multiply the 2 arrays
 			MultArray(sourceOut, impulseOut, multiplied, N);
-			IFFT(multiplied, result, N);
+
+			// Compute the inverse FFT
+			fftwf_plan reversePlan = fftwf_plan_dft_1d(N, multiplied, result, FFTW_BACKWARD, FFTW_ESTIMATE);
+			fftwf_execute(reversePlan);
 
 			// Convert the sound to float*
 			resultBufferCount = N;
@@ -157,6 +148,9 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 			ScaleBuffer(resultBuffer, resultBufferCount, 32767.f); // This line shouldn't be necessary
 
 			// Cleanup
+			fftwf_destroy_plan(sourcePlan);
+			fftwf_destroy_plan(impulsePlan);
+			fftwf_destroy_plan(reversePlan);
 			fftwf_free(sourceIn);
 			fftwf_free(sourceOut);
 			fftwf_free(impulseIn);
@@ -167,7 +161,6 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 		break;
 		case 1: // FFT segmented into source chunks
 		{
-			int const chunkSize = 1024;
 			int const N = chunkSize + impulseResponseCount - 1;
 
 			// Allocate arrays
@@ -180,26 +173,35 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 			resultBufferCount = impulseResponseCount + sourceSampleCount;
 			resultBuffer = (float*)calloc(resultBufferCount, sizeof(float));
 
-			// Impulse FFT only calculated once
-			FFT(impulseIn, impulseOut, N);
+			// Create plans
+			fftwf_plan sourcePlan = fftwf_plan_dft_1d(N, sourceIn, sourceOut, FFTW_FORWARD, FFTW_ESTIMATE);
+			fftwf_plan impulsePlan = fftwf_plan_dft_1d(N, impulseIn, impulseOut, FFTW_FORWARD, FFTW_ESTIMATE);
+			fftwf_plan reversePlan = fftwf_plan_dft_1d(N, multiplied, result, FFTW_BACKWARD, FFTW_ESTIMATE);
 
-			for (int jj = 0; jj * chunkSize < sourceSampleCount - chunkSize; ++jj) {
+			// Impulse FFT only calculated once
+			fftwf_execute(impulsePlan);
+
+			for (int jj = 0; jj * chunkSize < sourceSampleCount; ++jj) {
 				int const offset = jj * chunkSize;
+				int const sourceChunkSize = std::min(sourceSampleCount - offset, chunkSize);
 
 				// Fills the source buffer with chunkSize samples from the source, zero pads the end
-				FillComplexArray(&sourceBuffer[offset], sourceIn, chunkSize, N);
+				FillComplexArray(&sourceBuffer[offset], sourceIn, sourceChunkSize, chunkSize);
 
-				// Compute the mixed sound
-				FFT(sourceIn, sourceOut, N);
+				fftwf_execute(sourcePlan);
 				MultArray(sourceOut, impulseOut, multiplied, N);
-				IFFT(multiplied, result, N);
+				fftwf_execute(reversePlan);
 
-				AddRealArray(result, &resultBuffer[offset], N);
+				int const resultChunkSize = std::min(N, resultBufferCount - offset);
+				AddRealArray(result, &resultBuffer[offset], resultChunkSize); // Possible overflow
 			}
 
 			ScaleBuffer(resultBuffer, resultBufferCount, 32767.f); // This line shouldn't be necessary
 
 			// Cleanup
+			fftwf_destroy_plan(sourcePlan);
+			fftwf_destroy_plan(impulsePlan);
+			fftwf_destroy_plan(reversePlan);
 			fftwf_free(sourceIn);
 			fftwf_free(sourceOut);
 			fftwf_free(impulseIn);
@@ -211,7 +213,6 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 		break;
 		case 2:
 		{
-			int const chunkSize = 1024;
 			int const N = chunkSize + sourceSampleCount - 1;
 
 			// Allocate arrays
@@ -224,26 +225,35 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 			resultBufferCount = impulseResponseCount + sourceSampleCount;
 			resultBuffer = (float*)calloc(resultBufferCount, sizeof(float));
 
+			// Create plans
+			fftwf_plan sourcePlan = fftwf_plan_dft_1d(N, sourceIn, sourceOut, FFTW_FORWARD, FFTW_ESTIMATE);
+			fftwf_plan impulsePlan = fftwf_plan_dft_1d(N, impulseIn, impulseOut, FFTW_FORWARD, FFTW_ESTIMATE);
+			fftwf_plan reversePlan = fftwf_plan_dft_1d(N, multiplied, result, FFTW_BACKWARD, FFTW_ESTIMATE);
+
 			// Source FFT only calculated once
-			FFT(sourceIn, sourceOut, N);
+			fftwf_execute(sourcePlan);
 
-			for (int jj = 0; jj * chunkSize < sourceSampleCount - chunkSize; ++jj) {
+			for (int jj = 0; jj * chunkSize < impulseResponseCount; ++jj) {
 				int const offset = jj * chunkSize;
+				int const impulseChunkSize = std::min(impulseResponseCount - offset, chunkSize);
 
-				// Fills the source buffer with chunkSize samples from the source, zero pads the end
-				FillComplexArray(&impulseResponse[offset], impulseIn, chunkSize, N);
+				// Fills the impulse buffer with chunkSize samples from the source, zero pads the end
+				FillComplexArray(&impulseResponse[offset], impulseIn, impulseChunkSize, chunkSize);
 
-				// Compute the mixed sound
-				FFT(impulseIn, impulseOut, N);
+				fftwf_execute(impulsePlan);
 				MultArray(sourceOut, impulseOut, multiplied, N);
-				IFFT(multiplied, result, N);
+				fftwf_execute(reversePlan);
 
-				AddRealArray(result, &resultBuffer[offset], N);
+				int const resultChunkSize = std::min(N, resultBufferCount - offset);
+				AddRealArray(result, &resultBuffer[offset], resultChunkSize);
 			}
 
 			ScaleBuffer(resultBuffer, resultBufferCount, 32767.f); // This line shouldn't be necessary
 
 			// Cleanup
+			fftwf_destroy_plan(sourcePlan);
+			fftwf_destroy_plan(impulsePlan);
+			fftwf_destroy_plan(reversePlan);
 			fftwf_free(sourceIn);
 			fftwf_free(sourceOut);
 			fftwf_free(impulseIn);
