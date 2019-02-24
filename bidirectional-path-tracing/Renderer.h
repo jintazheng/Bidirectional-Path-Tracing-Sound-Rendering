@@ -7,8 +7,8 @@
 
 namespace
 {
-	int screenWidth = 800;
-	int screenHeight = 600;
+	int windowWidth = 800;
+	int windowHeight = 600;
 
 	float yaw = 0.;
 	float pitch = 0.;
@@ -23,18 +23,22 @@ namespace
 
 void RenderThread(World* world) {
 	sf::Shader adsLighting;
+	sf::Shader postAA;
 
 	// load both shaders
-	if (!adsLighting.loadFromFile("Shaders/ads.vert", "Shaders/ads.frag"))
-	{
+	if (!adsLighting.loadFromFile("Shaders/ads.vert", "Shaders/ads.frag")){
 		printf("Failed to load shader 'adsLighting'");
+		return;
+	}
+	if (!postAA.loadFromFile("Shaders/KAA.vert", "Shaders/KAA.frag")) {
+		printf("Failed to load shader 'postAA'");
 		return;
 	}
 
 
 	// create the window
 	sf::ContextSettings settings = sf::ContextSettings(32, 0, MSAALevel, 1, 1, 0, false);
-	sf::Window window(sf::VideoMode(screenWidth, screenHeight), "OpenGL", sf::Style::Default, settings);
+	sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "OpenGL", sf::Style::Default, settings);
 	window.setVerticalSyncEnabled(true);
 
 	// activate the window
@@ -42,7 +46,7 @@ void RenderThread(World* world) {
 
 	// Move the mouse to the center of the screen and hide it
 	if (mouseTrap) {
-		glm::vec2 centerScreen = glm::vec2(screenWidth / 2.f + window.getPosition().x, screenHeight / 2.f + window.getPosition().y);
+		glm::vec2 centerScreen = glm::vec2(windowWidth / 2.f + window.getPosition().x, windowHeight / 2.f + window.getPosition().y);
 		sf::Mouse::setPosition(sf::Vector2i(centerScreen.x, centerScreen.y));
 		window.setMouseCursorVisible(false);
 	}
@@ -61,15 +65,15 @@ void RenderThread(World* world) {
 				break;
 			case sf::Event::Resized:
 				// adjust the viewport when the window is resized
-				glViewport(0, 0, event.size.width, event.size.height);
-				screenWidth = event.size.width;
-				screenHeight = event.size.height;
+				windowWidth = event.size.width;
+				windowHeight = event.size.height;
+				glViewport(0, 0, windowWidth, windowHeight);
 				break;
 			case sf::Event::MouseMoved:
 				if (!mouseTrap)
 					break;
 				glm::vec2 lastMousePos = glm::vec2(sf::Mouse::getPosition().x, sf::Mouse::getPosition().y);
-				glm::vec2 centerScreen = glm::vec2(screenWidth / 2 + window.getPosition().x, screenHeight / 2 + window.getPosition().y);
+				glm::vec2 centerScreen = glm::vec2(windowWidth / 2 + window.getPosition().x, windowHeight / 2 + window.getPosition().y);
 				sf::Mouse::setPosition(sf::Vector2i(centerScreen.x, centerScreen.y));
 				glm::vec2 mouseDelta = lastMousePos - centerScreen;
 				yaw += mouseDelta.x * sens;
@@ -87,7 +91,7 @@ void RenderThread(World* world) {
 					// Left click to trap mouse
 					mouseTrap = true;
 					window.setMouseCursorVisible(false);
-					glm::vec2 centerScreen = glm::vec2(screenWidth / 2 + window.getPosition().x, screenHeight / 2 + window.getPosition().y);
+					glm::vec2 centerScreen = glm::vec2(windowWidth / 2 + window.getPosition().x, windowHeight / 2 + window.getPosition().y);
 					sf::Mouse::setPosition(sf::Vector2i(centerScreen.x, centerScreen.y));
 				}
 					break;
@@ -100,13 +104,19 @@ void RenderThread(World* world) {
 			running = false;
 		}
 
+
+		sf::RenderTexture pass1;
+		pass1.create(windowWidth, windowHeight, settings);
+		pass1.setActive();
+
+
         // clear the buffers
 		glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// setup projection
        	glMatrixMode(GL_PROJECTION);
-		glm::mat4 projection = glm::perspective(glm::radians(90.f), (float)screenWidth / (float)screenHeight, 0.001f, 1000.f);
+		glm::mat4 projection = glm::perspective(glm::radians(90.f), (float)windowWidth / (float)windowHeight, 0.001f, 1000.f);
 		glLoadMatrixf(glm::value_ptr(projection));
 
 		// setup camera
@@ -143,11 +153,11 @@ void RenderThread(World* world) {
 
 		// Draw the scene
 		sf::Shader::bind(&adsLighting);
-		adsLighting.setUniform("uLightPosition", sf::Glsl::Vec4(0, 0.f, 0, 1));
-		adsLighting.setUniform("uEyePosition", sf::Glsl::Vec4(translation[3][0], translation[3][1], translation[3][2], 1.f));   // Passing eye position to counteract???
+		adsLighting.setUniform("uLightPosition", sf::Glsl::Vec4(0, 0, 0, 1));
+		//adsLighting.setUniform("uEyePosition", sf::Glsl::Vec4(translation[3][0], translation[3][1], translation[3][2], 1.f));   // Passing eye position to counteract???
 		adsLighting.setUniform("uKa", 0.2f);
 		adsLighting.setUniform("uKd", 1.f);
-		adsLighting.setUniform("uKs", 0.f);  // THis is all fucked up
+		adsLighting.setUniform("uKs", 0.f);  // TODO: fix specular lighting
 		adsLighting.setUniform("uShininess", 50.f);
 		world->mOctree->Draw(&adsLighting);
 		for (int ii = 0; ii < world->mNonCollidingObjects.size(); ++ii) {
@@ -156,6 +166,39 @@ void RenderThread(World* world) {
 			UnlockWorld();
 		}
 		sf::Shader::bind(NULL);
+
+		// display the texture
+		pass1.display();
+
+		// activate the window
+		window.setActive(true);
+
+		// clear the buffers
+		glEnable(GL_DEPTH_TEST);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// setup orthographic projection
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0., windowWidth, windowHeight, 0, 0.1, 1000.);
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		// Load the first pass into a texture
+		sf::Texture initialPass = pass1.getTexture();
+		sf::Shader::bind(&postAA);
+		postAA.setUniform("uImageUnit", initialPass);
+
+		// Draw a fullscreen quad using the first pass
+		glBegin(GL_QUADS);
+			glNormal3f(0, 0, 1);
+
+			glTexCoord2f(0, 0); glVertex3f(0, 0, -4.f);
+			glTexCoord2f(1, 0); glVertex3f(windowWidth, 0, -4.f);
+			glTexCoord2f(1, 1); glVertex3f(windowWidth, windowHeight, -4.f);
+			glTexCoord2f(0, 1); glVertex3f(0, windowHeight, -4.f);
+		glEnd();
 
         // end the current frame (internally swaps the front and back buffers)
         window.display();

@@ -12,7 +12,8 @@ public:
 	}
 
 	virtual void Draw(sf::Shader* shader) {
-		sf::Shader::bind(shader); // Need to disable lighting for these
+		sf::Shader::bind(shader);
+		shader->setUniform("uSkipADS", true); // Turn off ADS shading
 		material->SetDrawColor(shader);
 		glLineWidth(material->drawColor.x() * 3.f);
 		glBegin(GL_LINE_STRIP);
@@ -20,6 +21,7 @@ public:
 			glVertex3f(it->x(), it->y(), it->z());
 		}
 		glEnd();
+		shader->setUniform("uSkipADS", false); // Turn on ADS shading
 	}
 
 	std::vector<Vec3> mPath;

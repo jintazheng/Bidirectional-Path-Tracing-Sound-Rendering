@@ -215,6 +215,8 @@ xcopy /y /d  "$(SolutionDir)bidirectional-path-tracing\3rd_party\FFTW\bin\*.dll"
   <ItemGroup>
     <None Include="Shaders\ads.frag" />
     <None Include="Shaders\ads.vert" />
+    <None Include="Shaders\KAA.frag" />
+    <None Include="Shaders\KAA.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

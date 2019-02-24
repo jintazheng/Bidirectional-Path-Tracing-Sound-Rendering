@@ -121,5 +121,11 @@
     <None Include="Shaders\ads.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="Shaders\KAA.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="Shaders\KAA.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
