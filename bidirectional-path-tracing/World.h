@@ -7,22 +7,19 @@ class World {
 public:
 	World() {
 		mOctree = nullptr;
-		mSounds = nullptr;
-		mSoundCount = 0;
 	}
 
-	World(std::vector<Object*> objects, std::vector<SoundNode*> sounds) {
-		mOctree = new Octree(objects, 0);
+	World(std::vector<Object*> collidingObjects, std::vector<Object*> nonCollidingObjects) {
+		mOctree = new Octree(collidingObjects, 0);
 
-		// Store sound objects in an array
-		mSoundCount = sounds.size();
-		mSounds = new SoundNode*[mSoundCount];
-		for (int ii = 0; ii < mSoundCount; ++ii) {
-			mSounds[ii] = sounds[ii];
-		}
+		// Store all objects that don't collide in a vector
+		mNonCollidingObjects = nonCollidingObjects;
+	}
+
+	void AddNonCollidingObject(Object* object) {
+		mNonCollidingObjects.push_back(object);
 	}
 
 	Octree* mOctree;
-	SoundNode** mSounds;
-	int mSoundCount;
+	std::vector<Object*> mNonCollidingObjects;
 };

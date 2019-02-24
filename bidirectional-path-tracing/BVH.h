@@ -135,6 +135,12 @@ public:
 		}
 	}
 
+	virtual void Draw() {
+		for (int ii = 0; ii < mElementsCount; ++ii) {
+			mElements[ii]->Draw();
+		}
+	}
+
 	bool mIsLeaf;
 	Triangle** mElements;
 	int mElementsCount;

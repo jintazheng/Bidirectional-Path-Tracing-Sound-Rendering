@@ -36,6 +36,12 @@ public:
 		return hit_anything;
 	}
 
+	virtual void Draw() {
+		for (int ii = 0; ii < list_size; ++ii) {
+			list[ii]->Draw();
+		}
+	}
+
 	Object **list;
 	int list_size;
 };

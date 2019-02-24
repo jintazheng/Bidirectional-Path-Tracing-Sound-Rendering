@@ -24,5 +24,7 @@ public:
 		mBoundingBox.Translate(trans);
 	}
 
+	virtual void Draw() = 0;
+
 	Box mBoundingBox;
 };

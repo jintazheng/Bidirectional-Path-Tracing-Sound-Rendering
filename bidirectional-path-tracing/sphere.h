@@ -1,6 +1,8 @@
 #pragma once
 
 #include "object.h"
+#include "SphereDraw.h"
+#include "material.h"
 
 class Sphere : public Object {
 public:
@@ -37,6 +39,13 @@ public:
 			}
 		}
 		return false;
+	}
+
+	virtual void Draw() {
+		material->SetDrawColor();
+		glTranslatef(center.x(), center.y(), center.z());
+		MjbSphere(radius, 20, 20);
+		glTranslatef(-center.x(), -center.y(), -center.z());
 	}
 
 	Vec3 center;

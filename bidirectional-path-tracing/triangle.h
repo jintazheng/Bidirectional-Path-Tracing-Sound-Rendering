@@ -18,9 +18,10 @@ public:
 	Triangle() {}
 	Triangle(Vec3 const& a, Vec3 const& b, Vec3 const& c, Material* m) : material(m) {
 		Vec3 zero(0, 0, 0);
-		A = Vertex(a, zero, zero); // should use cross product
-		B = Vertex(b, zero, zero);
-		C = Vertex(c, zero, zero);
+		Vec3 normal = cross(b - a, c - a);
+		A = Vertex(a, zero, normal);
+		B = Vertex(b, zero, normal);
+		C = Vertex(c, zero, normal);
 		Init();
 	};
 	Triangle(Vertex const& a, Vertex const& b, Vertex const& c, Material* m) : A(a), B(b), C(c), material(m) {
@@ -83,6 +84,19 @@ public:
 		B.mPos += trans;
 		C.mPos += trans;
 		Init();
+	}
+
+	virtual void Draw() {
+		//glColor3f(material->drawColor.x(), material->drawColor.y(), material->drawColor.z());
+		material->SetDrawColor();
+		glBegin(GL_TRIANGLES);
+		glNormal3f(A.mNorm.x(), A.mNorm.y(), A.mNorm.z());
+		glVertex3f(A.mPos.x(), A.mPos.y(), A.mPos.z());
+		glNormal3f(B.mNorm.x(), B.mNorm.y(), B.mNorm.z());
+		glVertex3f(B.mPos.x(), B.mPos.y(), B.mPos.z());
+		glNormal3f(C.mNorm.x(), C.mNorm.y(), C.mNorm.z());
+		glVertex3f(C.mPos.x(), C.mPos.y(), C.mPos.z());
+		glEnd();
 	}
 
 	Vertex A;
