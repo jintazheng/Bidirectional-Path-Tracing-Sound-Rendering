@@ -8,8 +8,9 @@ public:
 	Material(Vec3 const color) : drawColor(color) {}
 	virtual bool scatter() const = 0;
 
-	void SetDrawColor() {
-		glColor3f(drawColor.x(), drawColor.y(), drawColor.z());
+	void SetDrawColor(sf::Shader* shader) {
+		shader->setUniform("uColor", sf::Glsl::Vec4(drawColor.x(), drawColor.y(), drawColor.z(), 1.f));
+		/*glColor3f(drawColor.x(), drawColor.y(), drawColor.z());
 		glMaterialfv(GL_FRONT, GL_EMISSION, Array3(0, 0, 0));
 		glMaterialfv(GL_FRONT, GL_AMBIENT, Array3(drawColor.x(), drawColor.y(), drawColor.z()));
 		glMaterialfv(GL_FRONT, GL_DIFFUSE, Array3(drawColor.x(), drawColor.y(), drawColor.z()));
@@ -19,7 +20,7 @@ public:
 		glMaterialfv(GL_BACK, GL_AMBIENT, Array3(drawColor.x(), drawColor.y(), drawColor.z()));
 		glMaterialfv(GL_BACK, GL_DIFFUSE, Array3(drawColor.x(), drawColor.y(), drawColor.z()));
 		glMaterialfv(GL_BACK, GL_SPECULAR, Array3(0.f, 0.f, 0.f));
-		glMaterialf(GL_BACK, GL_SHININESS, 10);
+		glMaterialf(GL_BACK, GL_SHININESS, 10);*/
 	}
 
 	Vec3 drawColor;

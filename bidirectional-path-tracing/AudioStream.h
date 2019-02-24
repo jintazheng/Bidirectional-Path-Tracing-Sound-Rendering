@@ -127,7 +127,7 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 			fftwf_complex* multiplied = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * N);
 			fftwf_complex* result = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * N);
 
-			// Create forward FFT plans
+			// Create Forward FFT plans
 			fftwf_plan sourcePlan = fftwf_plan_dft_1d(N, sourceIn, sourceOut, FFTW_FORWARD, FFTW_ESTIMATE);
 			fftwf_plan impulsePlan = fftwf_plan_dft_1d(N, impulseIn, impulseOut, FFTW_FORWARD, FFTW_ESTIMATE);
 

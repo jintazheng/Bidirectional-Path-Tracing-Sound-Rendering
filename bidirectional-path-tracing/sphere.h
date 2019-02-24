@@ -41,8 +41,9 @@ public:
 		return false;
 	}
 
-	virtual void Draw() {
-		material->SetDrawColor();
+	virtual void Draw(sf::Shader* shader) {
+		sf::Shader::bind(shader);
+		material->SetDrawColor(shader);
 		glTranslatef(center.x(), center.y(), center.z());
 		MjbSphere(radius, 20, 20);
 		glTranslatef(-center.x(), -center.y(), -center.z());

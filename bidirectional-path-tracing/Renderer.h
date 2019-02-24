@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/OpenGL.hpp>
 #include <SFML/Window.hpp>
+#include <SFML/Graphics/Shader.hpp>
 #include <glm.hpp> // vec2, vec3, mat4, radians
 #include <ext.hpp> // perspective, translate, rotate
 
@@ -15,13 +16,25 @@ namespace
 	bool mouseTrap = false;
 	float const sens = 0.01;
 	float const moveSense = 0.1f;
+	unsigned int const MSAALevel = 0;
 	glm::mat4 translation = glm::mat4(1.0f);
 }
 
 
 void RenderThread(World* world) {
+	sf::Shader adsLighting;
+
+	// load both shaders
+	if (!adsLighting.loadFromFile("Shaders/ads.vert", "Shaders/ads.frag"))
+	{
+		printf("Failed to load shader 'adsLighting'");
+		return;
+	}
+
+
 	// create the window
-	sf::Window window(sf::VideoMode(screenWidth, screenHeight), "OpenGL", sf::Style::Default, sf::ContextSettings(32));
+	sf::ContextSettings settings = sf::ContextSettings(32, 0, MSAALevel, 1, 1, 0, false);
+	sf::Window window(sf::VideoMode(screenWidth, screenHeight), "OpenGL", sf::Style::Default, settings);
 	window.setVerticalSyncEnabled(true);
 
 	// activate the window
@@ -128,33 +141,21 @@ void RenderThread(World* world) {
 
 		glLoadMatrixf(glm::value_ptr(view * translation));
 
-		// setup scene
-		glEnable(GL_NORMALIZE);
-		glShadeModel(GL_SMOOTH);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_LIGHTING);
-
-		// set up light
-		glLightfv(GL_LIGHT0, GL_POSITION, Array3(0, 3, 0));
-		glLightfv(GL_LIGHT0, GL_AMBIENT, Array3(0.2, 0.2, 0.2));
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, Array3(1, 1, 1));
-		glLightfv(GL_LIGHT0, GL_SPECULAR, Array3(1, 1, 1));
-		glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.);
-		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.);
-		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.);
-		glEnable(GL_LIGHT0);
-
 		// Draw the scene
-		world->mOctree->Draw();	
+		sf::Shader::bind(&adsLighting);
+		adsLighting.setUniform("uLightPosition", sf::Glsl::Vec4(0, 0.f, 0, 1));
+		adsLighting.setUniform("uEyePosition", sf::Glsl::Vec4(translation[3][0], translation[3][1], translation[3][2], 1.f));   // Passing eye position to counteract???
+		adsLighting.setUniform("uKa", 0.2f);
+		adsLighting.setUniform("uKd", 1.f);
+		adsLighting.setUniform("uKs", 0.f);  // THis is all fucked up
+		adsLighting.setUniform("uShininess", 50.f);
+		world->mOctree->Draw(&adsLighting);
 		for (int ii = 0; ii < world->mNonCollidingObjects.size(); ++ii) {
 			LockWorld();
-			world->mNonCollidingObjects[ii]->Draw();
+			world->mNonCollidingObjects[ii]->Draw(&adsLighting);
 			UnlockWorld();
 		}
-
-		glDisable(GL_LIGHT0);
-		glDisable(GL_LIGHTING);
+		sf::Shader::bind(NULL);
 
         // end the current frame (internally swaps the front and back buffers)
         window.display();

@@ -86,9 +86,10 @@ public:
 		Init();
 	}
 
-	virtual void Draw() {
+	virtual void Draw(sf::Shader* shader) {
 		//glColor3f(material->drawColor.x(), material->drawColor.y(), material->drawColor.z());
-		material->SetDrawColor();
+		sf::Shader::bind(shader);
+		material->SetDrawColor(shader);
 		glBegin(GL_TRIANGLES);
 		glNormal3f(A.mNorm.x(), A.mNorm.y(), A.mNorm.z());
 		glVertex3f(A.mPos.x(), A.mPos.y(), A.mPos.z());

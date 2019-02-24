@@ -135,9 +135,9 @@ public:
 		}
 	}
 
-	virtual void Draw() {
+	virtual void Draw(sf::Shader* shader) {
 		for (int ii = 0; ii < mElementsCount; ++ii) {
-			mElements[ii]->Draw();
+			mElements[ii]->Draw(shader);
 		}
 	}
 

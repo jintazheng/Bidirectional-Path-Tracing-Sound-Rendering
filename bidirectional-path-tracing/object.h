@@ -24,7 +24,7 @@ public:
 		mBoundingBox.Translate(trans);
 	}
 
-	virtual void Draw() = 0;
+	virtual void Draw(sf::Shader* shader) = 0;
 
 	Box mBoundingBox;
 };

@@ -36,9 +36,9 @@ public:
 		return hit_anything;
 	}
 
-	virtual void Draw() {
+	virtual void Draw(sf::Shader* shader) {
 		for (int ii = 0; ii < list_size; ++ii) {
-			list[ii]->Draw();
+			list[ii]->Draw(shader);
 		}
 	}
 

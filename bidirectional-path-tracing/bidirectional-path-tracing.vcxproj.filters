@@ -19,6 +19,9 @@
     <Filter Include="Header Files\3rd_party\stb">
       <UniqueIdentifier>{770b7a42-c0fe-4294-92f3-89045d61b6a0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shaders">
+      <UniqueIdentifier>{31350294-42c4-4c53-98cb-df118ad237b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -110,5 +113,13 @@
     <ClCompile Include="bidirectional-path-tracing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\ads.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="Shaders\ads.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

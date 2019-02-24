@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vec3.h"
+#include "SFML/Graphics.hpp"
 
 namespace {
 	std::default_random_engine generator(time(NULL));
@@ -15,15 +16,6 @@ void LockWorld() {
 void UnlockWorld() {
 	worldMutex.unlock();
 }
-
-float* Array3(float x, float y, float z) {
-	static float arr[4];
-	arr[0] = x;
-	arr[1] = y;
-	arr[2] = z;
-	arr[3] = 1.f;
-	return arr;
-};
 
 
 template<typename T> 
