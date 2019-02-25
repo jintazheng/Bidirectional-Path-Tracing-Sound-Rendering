@@ -18,6 +18,9 @@ namespace
 	float const moveSense = 0.1f;
 	unsigned int const MSAALevel = 0;
 	glm::mat4 translation = glm::mat4(1.0f);
+
+	float lastFrametime = 0.f;
+	std::chrono::high_resolution_clock::time_point lastClock;
 }
 
 
@@ -35,11 +38,18 @@ void RenderThread(World* world) {
 		return;
 	}
 
+	// load a font
+	sf::Font font;
+	if (!font.loadFromFile("Fonts/arial.ttf")){
+		printf("Failed to load font 'arial.ttf'");
+		return;
+	}
+
 
 	// create the window
 	sf::ContextSettings settings = sf::ContextSettings(32, 0, MSAALevel, 1, 1, 0, false);
 	sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "OpenGL", sf::Style::Default, settings);
-	window.setVerticalSyncEnabled(true);
+	//window.setVerticalSyncEnabled(true);
 
 	// activate the window
 	window.setActive(true);
@@ -68,6 +78,7 @@ void RenderThread(World* world) {
 				windowWidth = event.size.width;
 				windowHeight = event.size.height;
 				glViewport(0, 0, windowWidth, windowHeight);
+				window.setView(sf::View(sf::FloatRect(0, 0, windowWidth, windowHeight)));
 				break;
 			case sf::Event::MouseMoved:
 				if (!mouseTrap)
@@ -103,7 +114,6 @@ void RenderThread(World* world) {
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 			running = false;
 		}
-
 
 		sf::RenderTexture pass1;
 		pass1.create(windowWidth, windowHeight, settings);
@@ -189,6 +199,8 @@ void RenderThread(World* world) {
 		sf::Texture initialPass = pass1.getTexture();
 		sf::Shader::bind(&postAA);
 		postAA.setUniform("uImageUnit", initialPass);
+		postAA.setUniform("uBlurThreshold", 0.15f);
+		postAA.setUniform("uBlurAmount", 1.f);
 
 		// Draw a fullscreen quad using the first pass
 		glBegin(GL_QUADS);
@@ -200,7 +212,21 @@ void RenderThread(World* world) {
 			glTexCoord2f(0, 1); glVertex3f(0, windowHeight, -4.f);
 		glEnd();
 
+		char buffer[32] = {};
+		snprintf(buffer, 32, "%.1f ms\n%.1f fps", lastFrametime, (1.f/lastFrametime) * 1000.f);
+		sf::Text text(buffer, font, 32);
+		text.setFillColor(sf::Color(255, 0, 0, 255));
+		window.pushGLStates();
+		window.draw(text);
+		window.popGLStates();
+
         // end the current frame (internally swaps the front and back buffers)
         window.display();
+
+		// Calculate the frametime
+		auto endFrame = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double, std::milli> fp_ms = endFrame - lastClock;
+		lastFrametime = fp_ms.count();
+		lastClock = endFrame;
     }
 }
