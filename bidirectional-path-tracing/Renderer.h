@@ -199,7 +199,7 @@ void RenderThread(World* world) {
 		sf::Texture initialPass = pass1.getTexture();
 		sf::Shader::bind(&postAA);
 		postAA.setUniform("uImageUnit", initialPass);
-		postAA.setUniform("uBlurThreshold", 0.15f);
+		postAA.setUniform("uBlurThreshold", 0.0f);
 		postAA.setUniform("uBlurAmount", 1.f);
 
 		// Draw a fullscreen quad using the first pass

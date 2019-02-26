@@ -6,6 +6,12 @@ namespace {
 	int const chunkSize = 1024;
 }
 
+void FillCompexArrayZeros(fftwf_complex* out, int const count) {
+	for (int ii = 0; ii < count; ++ii) {
+		out[ii][0] = 0;
+		out[ii][1] = 1;
+	}
+}
 
 void FillComplexArray(float* in, fftwf_complex* out, int const inCount, int const size) {
 	for (int ii = 0; ii < size; ++ii) {
@@ -107,8 +113,8 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 		sourceBuffer[ii] = (float)sourceSamples[ii];
 	}
 
-	// Mix the sounds in 3 different ways and compare their quality and times
-	for (int ii = 0; ii < 4; ++ii) {
+	// Mix the sounds in 5 different ways and compare their quality and times
+	for (int ii = 0; ii < 5; ++ii) {
 		int resultBufferCount = 0;
 		float * resultBuffer = nullptr;
 
@@ -159,7 +165,67 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 			fftwf_free(result);
 		}
 		break;
-		case 1: // FFT segmented into source chunks
+		case 1: // FFT with source and filter segmented
+		{
+			int N	   = chunkSize;
+			int totalN = ((std::max(impulseResponseCount, sourceSampleCount) + (N - 1)) / N) * N;  // Round up to nearest N
+
+			// Allocate arrays
+			fftwf_complex* sourceIn = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * N);
+			fftwf_complex* sourceOut = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * N);
+			fftwf_complex* impulseIn = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * N);
+			fftwf_complex* impulseOut = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * N);
+			fftwf_complex* multiplied = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * N);
+			fftwf_complex* result = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * N);
+			resultBufferCount = totalN;
+			resultBuffer = (float*)calloc(resultBufferCount, sizeof(float));
+
+			// Create plans
+			fftwf_plan sourcePlan = fftwf_plan_dft_1d(N, sourceIn, sourceOut, FFTW_FORWARD, FFTW_ESTIMATE);
+			fftwf_plan impulsePlan = fftwf_plan_dft_1d(N, impulseIn, impulseOut, FFTW_FORWARD, FFTW_ESTIMATE);
+			fftwf_plan reversePlan = fftwf_plan_dft_1d(N, multiplied, result, FFTW_BACKWARD, FFTW_ESTIMATE);
+
+			for (int jj = 0; jj * N < totalN; ++jj) {
+				int const offset = jj * N;
+				int const sourceActualSize = std::min(sourceSampleCount - offset, N);
+				int const impulseActualSize = std::min(impulseResponseCount - offset, N);
+
+				// Fills both buffers for convolution, 
+				if (sourceActualSize > 0) {
+					FillComplexArray(&sourceBuffer[offset], sourceIn, sourceActualSize, N);
+				} else {
+					FillCompexArrayZeros(sourceIn, N);
+				}
+				if (impulseActualSize > 0) {
+					FillComplexArray(&impulseResponse[offset], impulseIn, impulseActualSize, N);
+				} else {
+					FillCompexArrayZeros(impulseIn, N);
+				}
+
+				fftwf_execute(sourcePlan);
+				fftwf_execute(impulsePlan);
+				MultArray(sourceOut, impulseOut, multiplied, N);
+				fftwf_execute(reversePlan);
+
+				AddRealArray(result, &resultBuffer[offset], N);
+			}
+
+			ScaleBuffer(resultBuffer, resultBufferCount, 32767.f); // This line shouldn't be necessary
+
+			// Cleanup
+			fftwf_destroy_plan(sourcePlan);
+			fftwf_destroy_plan(impulsePlan);
+			fftwf_destroy_plan(reversePlan);
+			fftwf_free(sourceIn);
+			fftwf_free(sourceOut);
+			fftwf_free(impulseIn);
+			fftwf_free(impulseOut);
+			fftwf_free(multiplied);
+			fftwf_free(result);
+
+		}
+		break;
+		case 2: // FFT segmented into source chunks
 		{
 			int const N = chunkSize + impulseResponseCount - 1;
 
@@ -211,7 +277,7 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 
 		}
 		break;
-		case 2:
+		case 3:
 		{
 			int const N = chunkSize + sourceSampleCount - 1;
 
@@ -263,7 +329,7 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 
 		}
 		break;
-		case 3: // Convolution
+		case 4: // Convolution
 			resultBuffer = Convolution(impulseResponse, sourceBuffer, impulseResponseCount, sourceSampleCount, &resultBufferCount);
 			ScaleBuffer(resultBuffer, resultBufferCount, 32767.f); // This line shouldn't be necessary
 			break;
