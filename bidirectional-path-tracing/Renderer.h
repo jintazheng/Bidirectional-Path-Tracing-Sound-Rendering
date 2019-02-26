@@ -199,6 +199,8 @@ void RenderThread(World* world) {
 		sf::Texture initialPass = pass1.getTexture();
 		sf::Shader::bind(&postAA);
 		postAA.setUniform("uImageUnit", initialPass);
+		postAA.setUniform("uContrastThreshold", 0.0625f);  // 0.0833 0.0625 0.0312
+		postAA.setUniform("uRelativeThreshold", 0.166f);  // 0.333 0.250 0.166 0.125 0.063
 		postAA.setUniform("uBlurThreshold", 0.0f);
 		postAA.setUniform("uBlurAmount", 1.f);
 

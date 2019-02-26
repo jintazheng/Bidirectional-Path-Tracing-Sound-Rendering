@@ -167,7 +167,7 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 		break;
 		case 1: // FFT with source and filter segmented
 		{
-			int N	   = chunkSize;
+			int N = chunkSize;
 			int totalN = ((std::max(impulseResponseCount, sourceSampleCount) + (N - 1)) / N) * N;  // Round up to nearest N
 
 			// Allocate arrays
@@ -190,15 +190,17 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 				int const sourceActualSize = std::min(sourceSampleCount - offset, N);
 				int const impulseActualSize = std::min(impulseResponseCount - offset, N);
 
-				// Fills both buffers for convolution, 
+				// Fills both buffers for convolution, fills with zeros when the source buffers run out
 				if (sourceActualSize > 0) {
 					FillComplexArray(&sourceBuffer[offset], sourceIn, sourceActualSize, N);
-				} else {
+				}
+				else {
 					FillCompexArrayZeros(sourceIn, N);
 				}
 				if (impulseActualSize > 0) {
 					FillComplexArray(&impulseResponse[offset], impulseIn, impulseActualSize, N);
-				} else {
+				}
+				else {
 					FillCompexArrayZeros(impulseIn, N);
 				}
 
@@ -222,7 +224,6 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 			fftwf_free(impulseOut);
 			fftwf_free(multiplied);
 			fftwf_free(result);
-
 		}
 		break;
 		case 2: // FFT segmented into source chunks
