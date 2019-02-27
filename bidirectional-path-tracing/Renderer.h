@@ -198,20 +198,19 @@ void RenderThread(World* world) {
 		// Load the first pass into a texture
 		sf::Texture initialPass = pass1.getTexture();
 		sf::Shader::bind(&postAA);
-		postAA.setUniform("uImageUnit", initialPass);
-		postAA.setUniform("uContrastThreshold", 0.0625f);  // 0.0833 0.0625 0.0312
-		postAA.setUniform("uRelativeThreshold", 0.166f);  // 0.333 0.250 0.166 0.125 0.063
-		postAA.setUniform("uBlurThreshold", 0.0f);
-		postAA.setUniform("uBlurAmount", 1.f);
+		postAA.setUniform("uImageUnit", initialPass);      // * indicates defualt values
+		postAA.setUniform("uContrastThreshold", 0.0625f);  // 0.0833 *0.0625 0.0312
+		postAA.setUniform("uRelativeThreshold", 0.166f);   // 0.333 0.250 *0.166 0.125 0.063
+		postAA.setUniform("uBlurAmount", 0.75f);           // 1.00 *0.75 0.50 0.25 0.00
 
 		// Draw a fullscreen quad using the first pass
 		glBegin(GL_QUADS);
 			glNormal3f(0, 0, 1);
 
-			glTexCoord2f(0, 0); glVertex3f(0, 0, -4.f);
-			glTexCoord2f(1, 0); glVertex3f(windowWidth, 0, -4.f);
-			glTexCoord2f(1, 1); glVertex3f(windowWidth, windowHeight, -4.f);
-			glTexCoord2f(0, 1); glVertex3f(0, windowHeight, -4.f);
+			glTexCoord2f(0, 0); glVertex3f(0, 0, -1.f);
+			glTexCoord2f(1, 0); glVertex3f(windowWidth, 0, -1.f);
+			glTexCoord2f(1, 1); glVertex3f(windowWidth, windowHeight, -1.f);
+			glTexCoord2f(0, 1); glVertex3f(0, windowHeight, -1.f);
 		glEnd();
 
 		char buffer[32] = {};

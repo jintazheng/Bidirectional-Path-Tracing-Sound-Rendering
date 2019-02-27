@@ -3,13 +3,13 @@
 #include <SFML/Audio.hpp>
 
 namespace {
-	int const chunkSize = 1024;
+	int const chunkSize = 40000;
 }
 
 void FillCompexArrayZeros(fftwf_complex* out, int const count) {
 	for (int ii = 0; ii < count; ++ii) {
 		out[ii][0] = 0;
-		out[ii][1] = 1;
+		out[ii][1] = 0;
 	}
 }
 
@@ -190,17 +190,15 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 				int const sourceActualSize = std::min(sourceSampleCount - offset, N);
 				int const impulseActualSize = std::min(impulseResponseCount - offset, N);
 
-				// Fills both buffers for convolution, fills with zeros when the source buffers run out
+				// Fills both buffers with the next N samples.  If a source has run out of samples, fill with zeros
 				if (sourceActualSize > 0) {
 					FillComplexArray(&sourceBuffer[offset], sourceIn, sourceActualSize, N);
-				}
-				else {
+				} else {
 					FillCompexArrayZeros(sourceIn, N);
 				}
 				if (impulseActualSize > 0) {
 					FillComplexArray(&impulseResponse[offset], impulseIn, impulseActualSize, N);
-				}
-				else {
+				} else {
 					FillCompexArrayZeros(impulseIn, N);
 				}
 
