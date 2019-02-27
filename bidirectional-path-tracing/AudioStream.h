@@ -3,7 +3,7 @@
 #include <SFML/Audio.hpp>
 
 namespace {
-	int const chunkSize = 40000;
+	int const chunkSize = 1024;
 }
 
 void FillCompexArrayZeros(fftwf_complex* out, int const count) {
