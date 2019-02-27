@@ -7,20 +7,26 @@
 
 namespace
 {
+	// Window variables
 	int windowWidth = 800;
 	int windowHeight = 600;
+	char const * const windowTitle = "Ray tracing";
+	bool mouseTrap = false;
+	unsigned int MSAALevel = 0;
+	bool postAAEnabled = false;
 
+	// Movement variables
 	float yaw = 0.;
 	float pitch = 0.;
-
-	bool mouseTrap = false;
 	float const sens = 0.01;
 	float const moveSense = 0.1f;
-	unsigned int const MSAALevel = 0;
 	glm::mat4 translation = glm::mat4(1.0f);
 
+	// Timing variables
 	float lastFrametime = 0.f;
 	std::chrono::high_resolution_clock::time_point lastClock;
+	bool benchmarkMode = false;
+	std::vector<float> benchmarkFrametimes;
 }
 
 
@@ -47,8 +53,8 @@ void RenderThread(World* world) {
 
 
 	// create the window
-	sf::ContextSettings settings = sf::ContextSettings(32, 0, MSAALevel, 1, 1, 0, false);
-	sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "OpenGL", sf::Style::Default, settings);
+	sf::ContextSettings settings = sf::ContextSettings(24, 0, MSAALevel, 1, 1, 0, false);
+	sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), windowTitle, sf::Style::Default, settings);
 	//window.setVerticalSyncEnabled(true);
 
 	// activate the window
@@ -62,10 +68,10 @@ void RenderThread(World* world) {
 	}
 
 	bool running = true;
-    while (running)
-    {
-        // handle events
-        sf::Event event;
+	while (running)
+	{
+		// handle events
+		sf::Event event;
 		while (window.pollEvent(event))
 		{
 			switch (event.type) {
@@ -105,14 +111,43 @@ void RenderThread(World* world) {
 					glm::vec2 centerScreen = glm::vec2(windowWidth / 2 + window.getPosition().x, windowHeight / 2 + window.getPosition().y);
 					sf::Mouse::setPosition(sf::Vector2i(centerScreen.x, centerScreen.y));
 				}
-					break;
-				default:
-					break;
+				break;
+			case sf::Event::KeyPressed:
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+					running = false;
+				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::F1)) {
+					postAAEnabled = !postAAEnabled;
+				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::F2)) {
+					if (MSAALevel == 0) {
+						MSAALevel = 2;
+					}
+					else if (MSAALevel < 16) {
+						MSAALevel *= 2;
+					}
+					else {
+						MSAALevel = 0;
+					}
+					settings = sf::ContextSettings(24, 0, MSAALevel, 1, 1, 0, false);
+				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::F3)) {
+					if (benchmarkMode) {
+						// Print the results of the benchmark
+						float totalTime = 0.f;
+						for (auto it = benchmarkFrametimes.begin(); it != benchmarkFrametimes.end(); ++it) {
+							totalTime += *it;
+						}
+						float samples = (float)benchmarkFrametimes.size();
+						printf("Benchmark results: %f frames, %fms avg, %ffps avg\n", samples, totalTime / samples, samples / totalTime * 1000.f);
+						benchmarkFrametimes.clear();
+					}
+					benchmarkMode = !benchmarkMode;
+				}
+				break;
+			default:
+				break;
 			}
-		}
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
-			running = false;
 		}
 
 		sf::RenderTexture pass1;
@@ -120,12 +155,12 @@ void RenderThread(World* world) {
 		pass1.setActive();
 
 
-        // clear the buffers
+		// clear the buffers
 		glEnable(GL_DEPTH_TEST);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// setup projection
-       	glMatrixMode(GL_PROJECTION);
+		glMatrixMode(GL_PROJECTION);
 		glm::mat4 projection = glm::perspective(glm::radians(90.f), (float)windowWidth / (float)windowHeight, 0.001f, 1000.f);
 		glLoadMatrixf(glm::value_ptr(projection));
 
@@ -142,17 +177,19 @@ void RenderThread(World* world) {
 		glm::vec3 strafe(view[0][0], view[1][0], view[2][0]);
 		float dx = 0;
 		float dz = 0;
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-			dz = moveSense;
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-			dx = moveSense;
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-			dz = -moveSense;
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-			dx = -moveSense;
+		if (mouseTrap) {
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+				dz = moveSense;
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+				dx = moveSense;
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+				dz = -moveSense;
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+				dx = -moveSense;
+			}
 		}
 
 		translation = glm::translate(translation, dz * forward);
@@ -202,6 +239,7 @@ void RenderThread(World* world) {
 		postAA.setUniform("uContrastThreshold", 0.0625f);  // 0.0833 *0.0625 0.0312
 		postAA.setUniform("uRelativeThreshold", 0.166f);   // 0.333 0.250 *0.166 0.125 0.063
 		postAA.setUniform("uBlurAmount", 0.75f);           // 1.00 *0.75 0.50 0.25 0.00
+		postAA.setUniform("uEnabled", postAAEnabled);	   // enable / disable
 
 		// Draw a fullscreen quad using the first pass
 		glBegin(GL_QUADS);
@@ -213,8 +251,14 @@ void RenderThread(World* world) {
 			glTexCoord2f(0, 1); glVertex3f(0, windowHeight, -1.f);
 		glEnd();
 
-		char buffer[32] = {};
-		snprintf(buffer, 32, "%.1f ms\n%.1f fps", lastFrametime, (1.f/lastFrametime) * 1000.f);
+		char buffer[64] = {};
+		snprintf(buffer, 64, "%.1f ms\n%.1f fps\nMSAA %ux", lastFrametime, (1.f/lastFrametime) * 1000.f, MSAALevel);
+		if (postAAEnabled) {
+			strncat_s(buffer, "\nPost AA", 9);
+		}
+		if (benchmarkMode) {
+			strncat_s(buffer, "\nBenchmarking...", 17);
+		}
 		sf::Text text(buffer, font, 32);
 		text.setFillColor(sf::Color(255, 0, 0, 255));
 		window.pushGLStates();
@@ -229,5 +273,8 @@ void RenderThread(World* world) {
 		std::chrono::duration<double, std::milli> fp_ms = endFrame - lastClock;
 		lastFrametime = fp_ms.count();
 		lastClock = endFrame;
+		if (benchmarkMode) {
+			benchmarkFrametimes.push_back(lastFrametime);
+		}
     }
 }

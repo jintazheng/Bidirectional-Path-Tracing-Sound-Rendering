@@ -5,9 +5,11 @@ in  vec2  vST;			// texture coords
 uniform sampler2D uImageUnit; // the texture unit where the texture is located
 
 
-uniform float uContrastThreshold;
-uniform float uRelativeThreshold;
-uniform float uBlurAmount;
+uniform float uContrastThreshold;	// The minimum contrast required to blur a pixel
+uniform float uRelativeThreshold;	// The minimum luminance difference required based on the max luminance of surrounding pixels
+uniform float uBlurAmount;	// Multiplied as a factor in blurring
+
+uniform bool  uEnabled;   // When enabled is false, the shader will not do any work
 
 vec3 LUMCOEFFS = vec3(0.2125, 0.7154, 0.0721);
 
@@ -18,12 +20,18 @@ float GetLuminance(vec2 offset) {
 void
 main( )
 {	
+	// Early out
+	if (!uEnabled) {
+		gl_FragColor = vec4(texture(uImageUnit, vST).rgb, 1);
+		return;
+	}
+
 	// detect edges
 	vec2  size  = textureSize(uImageUnit, 0);
 	float sStep = 1. / size.x;
 	float tStep = 1. / size.y;
 
-	// get the luminosity of surrounding texels
+	// get the luminosity of surrounding pixels
 	float topLeftLum = GetLuminance(vec2(-sStep, tStep));
 	float topMidLum = GetLuminance(vec2(0, tStep));
 	float topRightLum = GetLuminance(vec2(sStep, tStep));
@@ -42,12 +50,10 @@ main( )
 	// determine if this pixel should be skipped
 	if(contrast < uContrastThreshold) {
 		gl_FragColor = vec4(texture(uImageUnit, vST).rgb, 1);
-		//gl_FragColor = vec4(1, 0, 0, 1);
 		return;
 	}
 	if(contrast < uRelativeThreshold * highestLum) {
 		gl_FragColor = vec4(texture(uImageUnit, vST).rgb, 1);
-		//gl_FragColor = vec4(0, 1, 0, 1);
 		return;
 	}
 
