@@ -114,7 +114,7 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 	}
 
 	// Mix the sounds in 5 different ways and compare their quality and times
-	for (int ii = 0; ii < 5; ++ii) {
+	for (int ii = 0; ii < 1; ++ii) {
 		int resultBufferCount = 0;
 		float * resultBuffer = nullptr;
 

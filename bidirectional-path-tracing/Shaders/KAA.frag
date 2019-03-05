@@ -1,13 +1,13 @@
 #version 330 compatibility
 
-in  vec2  vST;			// texture coords
+in  vec2  vST;				  // texture coords
 
 uniform sampler2D uImageUnit; // the texture unit where the texture is located
 
 
 uniform float uContrastThreshold;	// The minimum contrast required to blur a pixel
 uniform float uRelativeThreshold;	// The minimum luminance difference required based on the max luminance of surrounding pixels
-uniform float uBlurAmount;	// Multiplied as a factor in blurring
+uniform float uBlurAmount;		    // Multiplied as a factor in blurring
 
 uniform bool  uEnabled;   // When enabled is false, the shader will not do any work
 
