@@ -89,6 +89,18 @@ float* Convolution(float *arr1, float *arr2, int len1, int len2, int *lenResult)
 	return result;
 }
 
+void WriteBufferToCSV(fftwf_complex* buffer, int const count, std::string const& filename) {
+	std::ofstream file;
+	file.open(filename);
+	for (int jj = 0; jj < 2; ++jj) {
+		for (int ii = 0; ii < count; ++ii) {
+			file << buffer[ii][jj] << ",";
+		}
+		file << "\n";
+	}
+	file.close();
+}
+
 void ScaleBuffer(float* buffer, int const count, float const maxValue) {
 	float max = 0.f;
 	for (int ii = 0; ii < count; ++ii) {
@@ -99,6 +111,14 @@ void ScaleBuffer(float* buffer, int const count, float const maxValue) {
 	if (max > maxValue) {
 		for (int ii = 0; ii < count; ++ii) {
 			buffer[ii] /= (max / maxValue);
+		}
+	}
+}
+
+void DivBuffer(fftwf_complex* in, int const count, float const div) {
+	for (int jj = 0; jj < 2; ++jj) {
+		for (int ii = 0; ii < count; ++ii) {
+			in[ii][jj] /= div;
 		}
 	}
 }
@@ -133,6 +153,10 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 			fftwf_complex* multiplied = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * N);
 			fftwf_complex* result = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * N);
 
+			// Write to CSV for debug
+			WriteBufferToCSV(sourceIn, N, "Output/source.csv");
+			WriteBufferToCSV(impulseIn, N, "Output/filter.csv");
+
 			// Create Forward FFT plans
 			fftwf_plan sourcePlan = fftwf_plan_dft_1d(N, sourceIn, sourceOut, FFTW_FORWARD, FFTW_ESTIMATE);
 			fftwf_plan impulsePlan = fftwf_plan_dft_1d(N, impulseIn, impulseOut, FFTW_FORWARD, FFTW_ESTIMATE);
@@ -148,10 +172,14 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 			fftwf_plan reversePlan = fftwf_plan_dft_1d(N, multiplied, result, FFTW_BACKWARD, FFTW_ESTIMATE);
 			fftwf_execute(reversePlan);
 
+			// Write to CSV for debugs
+			DivBuffer(result, N, N);
+			WriteBufferToCSV(result, N, "Output/mixedSound.csv");
+
 			// Convert the sound to float*
 			resultBufferCount = N;
 			resultBuffer = GetRealArray(result, N);
-			ScaleBuffer(resultBuffer, resultBufferCount, 32767.f); // This line shouldn't be necessary
+			//ScaleBuffer(resultBuffer, resultBufferCount, 32767.f); // This line shouldn't be necessary
 
 			// Cleanup
 			fftwf_destroy_plan(sourcePlan);
@@ -355,6 +383,8 @@ void ProcessSound(float* impulseResponse, int const impulseResponseCount, sf::In
 		sf::Sound sound;
 		sound.setBuffer(buffer);
 		sound.play();
+
+		buffer.saveToFile("Output/mixedSound.wav");
 
 		// Allow the sound to play before the data is deleted
 		std::this_thread::sleep_for(std::chrono::milliseconds((int)(resultBufferCount / samplesPerSecond * 1000.f)));
