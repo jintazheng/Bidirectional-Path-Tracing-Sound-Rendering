@@ -65,10 +65,10 @@ public:
 		return false;
 	}
 
-	virtual void Draw() {
+	virtual void Draw(sf::Shader* shader) {
 		glBegin(GL_TRIANGLES);
 		for (auto it = mTriangles.begin(); it != mTriangles.end(); ++it) {
-			(*it)->Draw();
+			(*it)->Draw(shader);
 		}
 	}
 

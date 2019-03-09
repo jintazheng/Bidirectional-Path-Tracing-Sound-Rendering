@@ -11,16 +11,17 @@ public:
 		return false;
 	}
 
-	virtual void Draw() {
-		glDisable(GL_LIGHTING);
-		material->SetDrawColor();
+	virtual void Draw(sf::Shader* shader) {
+		sf::Shader::bind(shader);
+		shader->setUniform("uSkipADS", true); // Turn off ADS shading
+		material->SetDrawColor(shader);
 		glLineWidth(material->drawColor.x() * 3.f);
 		glBegin(GL_LINE_STRIP);
 		for (auto it = mPath.begin(); it != mPath.end(); ++it) {
 			glVertex3f(it->x(), it->y(), it->z());
 		}
 		glEnd();
-		glEnable(GL_LIGHTING);
+		shader->setUniform("uSkipADS", false); // Turn on ADS shading
 	}
 
 	std::vector<Vec3> mPath;
